@@ -1,0 +1,11 @@
+nutrient,type,min,max,unit,notes
+carbohydrate,range,45,75,% of total energy,mainly unrefined carbohydrates
+free_sugars,max,,10,% of total energy,5% or less may give extra benefit; about 50 g at 2000 kcal
+total_fat,range,15,30,% of total energy,adults
+saturated_fat,max,,10,% of total energy,
+trans_fat,max,,1,% of total energy,
+protein,range,10,15,% of total energy,about 50-75 g at 2000 kcal
+salt,max,,5,g/day,2 g sodium per day
+potassium,min,3510,,mg/day,90 mmol/day; may be beneficial
+fruit_veg,min,400,,g/day,age over 10
+fibre,min,25,,g/day,age over 10; naturally occurring
