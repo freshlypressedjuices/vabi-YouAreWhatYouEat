@@ -17,3 +17,6 @@ env/
 *.twbr
 *.tmp
 ~*
+
+# Large GDD downloads kept locally
+/data/raw/gdd/

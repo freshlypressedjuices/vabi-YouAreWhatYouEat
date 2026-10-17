@@ -1,0 +1,48 @@
+factor_code,varnum,dietary_factor,unit
+v01,1,Fruits,grams per day
+v02,2,Non-starchy vegetables,grams per day
+v03,3,Potatoes,grams per day
+v04,4,Other starchy vegetables,grams per day
+v05,5,Beans and legumes,grams per day
+v06,6,Nuts and seeds,grams per day
+v07,7,Refined grains,grams per day
+v08,8,Whole grains,grams per day
+v09,9,Total processed meats,grams per day
+v10,10,Unprocessed red meats,grams per day
+v11,11,Total seafoods,grams per day
+v12,12,Eggs,grams per day
+v13,13,Cheese,grams per day
+v14,14,Yoghurt (including fermented milk),grams per day
+v15,15,Sugar-sweetened beverages,grams per day
+v16,16,Fruit juices,grams per day
+v17,17,Coffee,cups/day (1 cup=8 oz)
+v18,18,Tea,cups/day (1 cup=8 oz)
+v22,22,Total carbohydrates,% of total kcal per day (energy contribution)
+v23,23,Total protein,grams per day
+v27,27,Saturated fat,% of total kcal per day (energy contribution)
+v28,28,Monounsaturated fatty acids,% of total kcal per day (energy contribution)
+v29,29,Total omega-6 fat,% of total kcal per day (energy contribution)
+v30,30,Seafood omega-3 fat,milligrams (mg) per day
+v31,31,Plant omega-3 fat,milligrams (mg) per day
+v33,33,Dietary cholesterol,milligrams (mg) per day
+v34,34,Dietary fiber,grams per day
+v35,35,Added sugars,% of total kcal per day (energy contribution)
+v36,36,Calcium,milligrams (mg) per day
+v37,37,Dietary sodium,milligrams (mg) per day
+v38,38,Iodine,micrograms (µg) per day
+v39,39,Iron,milligrams (mg) per day
+v40,40,Magnesium,milligrams (mg) per day
+v41,41,Potassium,milligrams (mg) per day
+v42,42,Selenium,micrograms (µg) per day
+v43,43,Vitamin A w/ supplements,μg RAE/day (RAE=retinol activity equivalent)
+v45,45,Vitamin B1,milligrams (mg) per day
+v46,46,Vitamin B2,milligrams (mg) per day
+v47,47,Vitamin B3,milligrams (mg) per day
+v48,48,Vitamin B6,milligrams (mg) per day
+v49,49,Vitamin B9 (Folate),micrograms (µg) per day DFE
+v50,50,Vitamin B12,micrograms (µg) per day
+v51,51,Vitamin C,milligrams (mg) per day
+v52,52,Vitamin D,micrograms (µg) per day
+v53,53,Vitamin E,milligrams (mg) per day
+v54,54,Zinc,milligrams (mg) per day
+v57,57,Total Milk,grams per day
