@@ -5,11 +5,11 @@
 ```
 vabi-YouAreWhatYouEat/
 ├── data/
-│   ├── raw/          # untouched downloads: FAO, GHO CSVs, Open Food Facts, urbanization
+│   ├── raw/          # untouched downloads: GDD, GHO CSVs, Open Food Facts, urbanization
 │   ├── reference/    # hand-built tables: who_guidelines.csv
 │   └── cleaned/      # outputs of the notebooks
 ├── notebooks/
-│   ├── 01_fao_cleaning.ipynb
+│   ├── 01_gdd_cleaning.ipynb
 │   ├── 02_who_gho_cleaning.ipynb
 │   ├── 03_open_food_facts_cleaning.ipynb
 │   ├── 04_urbanization_cleaning.ipynb
