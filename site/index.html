@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>You Are What Your Country Eats</title>
+<meta name="description" content="An interactive explorer of how 185 countries' diets changed from 1990 to 2018, how far they are from WHO targets, and how diet relates to health.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: a clear, confident data story for a class and the public; findings first, no fluff.
+   IDEA: a nutrition label: bold rules, plain numbers, one strong colour per section.
+   PICTURE: the live Tableau dashboards themselves, framed large, with each sheet explained beside a "load it live" button.
+   COLOUR and TYPE: white ground, ink #101418, deep leaf green #14532d leading, saffron #f2a516 accent; Manrope throughout.
+   LAYOUT: sticky top nav, hero with three headline numbers, then one full-width band per dashboard. */
+:root{color-scheme:light dark;
+  --bg:light-dark(#ffffff,#0f1412);--ink:light-dark(#101418,#e8efe9);--muted:light-dark(#4a5550,#a3b0a8);
+  --line:light-dark(#dbe3dd,#26302b);--card:light-dark(#f4f7f5,#161d1a);
+  --green:light-dark(#14532d,#6fcf97);--green-bg:light-dark(#14532d,#0b2a18);--on-green:#f3fbf5;
+  --accent:#f2a516;--accent-ink:#2b1d00}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 Manrope,system-ui,sans-serif;overflow-x:clip}
+a{color:var(--green)}
+h1,h2,h3{line-height:1.08;text-wrap:balance;margin:0}
+h1{font-size:clamp(36px,6vw,58px);font-weight:800;letter-spacing:-.02em}
+h2{font-size:clamp(28px,4vw,40px);font-weight:800;letter-spacing:-.01em}
+h3{font-size:19px;font-weight:700}
+p{margin:0 0 12px;max-width:70ch}
+.wrap{max-width:1240px;margin:0 auto}
+.band{padding:clamp(36px,5vw,72px) max(5vw,16px)}
+.band+.band{border-top:1px solid var(--line)}
+.lead{font-size:18px;color:var(--muted);max-width:62ch}
+
+/* nav */
+nav{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:2px solid var(--ink)}
+nav .wrap{display:flex;align-items:center;gap:18px;padding:12px max(5vw,16px);flex-wrap:wrap}
+nav .brand{font-weight:800;text-decoration:none;color:var(--ink);margin-right:auto}
+nav .links{display:flex;gap:4px;flex-wrap:wrap}
+nav .links a{color:var(--ink);text-decoration:none;font-weight:600;font-size:15px;padding:8px 10px;border-radius:6px}
+nav .links a:hover,nav .links a:focus-visible{background:var(--card);outline:none}
+
+/* hero */
+.hero{background:var(--green-bg);color:var(--on-green)}
+.hero .lead{color:#cfe6d7}
+.hero .team{margin-top:18px;font-size:15px;color:#cfe6d7}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;margin-top:40px;border-top:6px solid var(--on-green)}
+.stat{padding:20px 20px 4px 0;border-right:1px solid rgba(243,251,245,.25)}
+.stat:last-child{border-right:0}
+.stat+.stat{padding-left:20px}
+.stat b{display:block;font-size:clamp(34px,5vw,54px);font-weight:800;line-height:1;white-space:nowrap}
+.stat span{display:block;margin-top:8px;font-size:15px;color:#cfe6d7}
+.stat b em{font-style:normal;color:var(--accent)}
+
+/* generic grids */
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:28px}
+.box{background:var(--card);border-top:4px solid var(--ink);padding:20px}
+.box h3{margin-bottom:8px}
+.box p{font-size:15px;margin:0}
+.box .big{font-size:30px;font-weight:800;display:block;line-height:1.1;margin-bottom:6px;color:var(--green)}
+ol.steps{margin:24px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px;counter-reset:s}
+ol.steps li{border-top:2px solid var(--line);padding-top:12px;font-size:15px;counter-increment:s}
+ol.steps li::before{content:"Step " counter(s);display:block;font-weight:800;color:var(--green);font-size:14px;margin-bottom:4px}
+
+/* dashboard sections */
+.dash-head{display:grid;grid-template-columns:auto minmax(0,1fr);gap:20px;align-items:start}
+.tag{display:inline-grid;place-items:center;width:64px;height:64px;border-radius:8px;background:var(--green-bg);color:var(--on-green);font-size:34px;font-weight:800}
+.vizframe{margin-top:28px;border:2px solid var(--ink);border-radius:10px;overflow:auto;background:var(--card)}
+.vizframe .slot{min-width:960px;min-height:820px;display:grid;place-items:center;color:var(--muted)}
+.vizframe iframe{display:block;width:100%}
+.hint{font-size:14px;color:var(--muted);margin-top:8px}
+.sheets{display:grid;gap:18px;margin-top:36px}
+.sheet{border:1px solid var(--line);border-left:6px solid var(--green);border-radius:8px;padding:20px}
+.sheet header{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;margin-bottom:10px}
+.sheet header small{font-weight:700;color:var(--green);font-size:14px}
+.sheet dl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:0}
+.sheet dt{font-weight:800;font-size:14px;margin-bottom:4px}
+.sheet dd{margin:0;font-size:15px}
+.sheet .find{background:light-dark(#fff6df,#2a2210);padding:10px 12px;border-radius:6px}
+.btn{display:inline-flex;align-items:center;gap:8px;margin-top:16px;min-height:44px;padding:10px 16px;border-radius:8px;border:2px solid var(--ink);background:var(--bg);color:var(--ink);font:700 15px Manrope,system-ui,sans-serif;cursor:pointer}
+.btn:hover,.btn:focus-visible{background:var(--ink);color:var(--bg);outline:none}
+.sheet .vizframe{margin-top:18px}
+.sheet .vizframe .slot{min-height:620px}
+
+/* conclusion */
+.closing{background:var(--card)}
+.takeaways{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:24px;counter-reset:t}
+.takeaways div{border-top:6px solid var(--accent);padding-top:14px;counter-increment:t}
+.takeaways div::before{content:counter(t);font-weight:800;font-size:28px;color:var(--green);display:block}
+ul.plain{padding-left:20px;margin:8px 0 0}
+ul.plain li{margin-bottom:6px;max-width:70ch}
+footer{background:var(--ink);color:var(--bg);font-size:14px}
+footer a{color:var(--accent)}
+footer .cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}
+footer h3{font-size:15px;margin-bottom:8px}
+
+@media(max-width:860px){
+  .grid3,.takeaways,footer .cols{grid-template-columns:minmax(0,1fr)}
+  ol.steps{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .sheet dl{grid-template-columns:minmax(0,1fr)}
+}
+@media(max-width:600px){
+  .stats{grid-template-columns:minmax(0,1fr)}
+  .stat,.stat+.stat{border-right:0;padding-left:0;border-bottom:1px solid rgba(243,251,245,.25)}
+  ol.steps{grid-template-columns:minmax(0,1fr)}
+  .dash-head{grid-template-columns:minmax(0,1fr)}
+  nav .links{display:none}
+}
+</style>
+</head>
+<body>
+
+<nav aria-label="Sections">
+  <div class="wrap">
+    <a class="brand" href="#top">You Are What Your Country Eats</a>
+    <div class="links">
+      <a href="#problem">Problem</a>
+      <a href="#data">Data</a>
+      <a href="#dash-a">What the world eats</a>
+      <a href="#dash-b">Guideline gap</a>
+      <a href="#dash-c">Diet and health</a>
+      <a href="#conclusion">Conclusion</a>
+    </div>
+  </div>
+</nav>
+
+<header class="band hero" id="top">
+  <div class="wrap">
+    <h1>You Are What Your Country Eats</h1>
+    <p class="lead" style="margin-top:16px">An interactive explorer of what 185 countries eat, how far that is from WHO's healthy diet targets, and how it relates to health, from 1990 to 2018.</p>
+    <p class="team">Group 7 · Siti, Marilyn, Syakira, Riya · IS428 Visual Analytics, Singapore Management University</p>
+    <div class="stats">
+      <div class="stat"><b>11.5% <em>→</em> 22.3%</b><span>Average adult obesity rate across countries, 1990 to 2018</span></div>
+      <div class="stat"><b>0</b><span>Countries meeting all 8 WHO healthy diet targets in 2018</span></div>
+      <div class="stat"><b>5.3% <em>→</em> 14.2%</b><span>South-East Asia's calories from added sugar, from second-lowest region to highest</span></div>
+    </div>
+  </div>
+</header>
+
+<section class="band" id="problem">
+  <div class="wrap">
+    <h2>The world is changing what it eats</h2>
+    <p class="lead" style="margin-top:14px">As countries get richer, diets move away from traditional, plant-heavy meals towards more sugar, processed meat and refined food. Researchers call this the nutrition transition (Popkin, 1993).</p>
+    <div class="grid3">
+      <div class="box"><h3>The shift is real</h3><p>Diet-related disease is rising with it: across our countries, average adult obesity roughly doubled from 1990 to 2018, and diabetes rose from 7.8% to 13.1%.</p></div>
+      <div class="box"><h3>But it gets little attention</h3><p>Public debate about diet is mostly about trends like keto, vegan or intermittent fasting, not the slower, much larger change in what whole populations eat.</p></div>
+      <div class="box"><h3>And the data is scattered</h3><p>WHO's health statistics sit apart from diet data, and existing diet charts are separate and static. We bring diet, WHO targets and health together in one interactive tool.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="band" id="data">
+  <div class="wrap">
+    <h2>Our data and how we prepared it</h2>
+    <div class="grid3">
+      <div class="box"><span class="big">47 foods</span><h3>Global Dietary Database</h3><p>Tufts University's modelled estimates of average daily intake for 185 countries in 1990, 1995, 2000, 2005, 2010, 2015 and 2018.</p></div>
+      <div class="box"><span class="big">8 targets</span><h3>WHO healthy diet targets</h3><p>Minimums such as at least 400 g of fruit and vegetables a day, and limits such as under 5 g of salt and under 10% of calories from free sugars.</p></div>
+      <div class="box"><span class="big">3 outcomes</span><h3>WHO Global Health Observatory</h3><p>Adult obesity, adult diabetes, and the risk of dying early (ages 30 to 69) from non-communicable disease.</p></div>
+    </div>
+    <ol class="steps">
+      <li>Filtered over a million rows per food down to the all-population estimate for each country and year.</li>
+      <li>Combined all 47 foods into one table, so one dropdown switches between them.</li>
+      <li>Matched countries across datasets by ISO code and tagged each with its WHO region.</li>
+      <li>Converted intake into WHO units and paired each country's diet with its health 5 or 10 years later.</li>
+    </ol>
+    <p class="hint" style="margin-top:18px">We chose the Global Dietary Database over FAO food balance sheets because FAO measures food supply, not what people actually eat.</p>
+  </div>
+</section>
+
+<section class="band" id="dash-a">
+  <div class="wrap">
+    <div class="dash-head">
+      <span class="tag" aria-hidden="true">A</span>
+      <div>
+        <h2>What the world eats: diets are converging</h2>
+        <p class="lead" style="margin-top:12px">Pick any of 47 foods to see who eats the most and least, and how each region has changed since 1990. Press play on the map to watch the years go by.</p>
+      </div>
+    </div>
+    <div class="vizframe"><div class="slot" data-viz="Dashboard1" data-h="820">Loading the interactive dashboard…</div></div>
+    <p class="hint">Scroll sideways inside the frame on small screens. Click a region in any chart to highlight it across the dashboard.</p>
+    <div class="sheets" id="sheets-a"></div>
+  </div>
+</section>
+
+<section class="band" id="dash-b">
+  <div class="wrap">
+    <div class="dash-head">
+      <span class="tag" aria-hidden="true">B</span>
+      <div>
+        <h2>The guideline gap: no country meets all 8 WHO targets</h2>
+        <p class="lead" style="margin-top:12px">Each country's diet is checked against WHO's eight healthy diet targets, every year. Change the year to see how compliance has moved since 1990.</p>
+      </div>
+    </div>
+    <div class="vizframe"><div class="slot" data-viz="Dashboard2" data-h="820">Loading the interactive dashboard…</div></div>
+    <p class="hint">How we score it: a country meets a target if its intake is above the minimum or below the limit, giving a score out of 8. The gap % shows how far it is from each target, as a percentage of the target.</p>
+    <div class="sheets" id="sheets-b"></div>
+  </div>
+</section>
+
+<section class="band" id="dash-c">
+  <div class="wrap">
+    <div class="dash-head">
+      <span class="tag" aria-hidden="true">C</span>
+      <div>
+        <h2>Diet and health: real links, but wealth muddies them</h2>
+        <p class="lead" style="margin-top:12px">Choose a food, a health outcome, a 5 or 10-year lag and a diet year to see whether countries that ate more of something had different health later.</p>
+      </div>
+    </div>
+    <div class="vizframe"><div class="slot" data-viz="Dashboard3" data-h="860">Loading the interactive dashboard…</div></div>
+    <p class="hint">These are Spearman correlations: countries are ranked on diet and on health, and we check whether the rankings move together, from −1 to +1. Ranking stops a few extreme countries from skewing the result.</p>
+    <div class="sheets" id="sheets-c"></div>
+  </div>
+</section>
+
+<section class="band closing" id="conclusion">
+  <div class="wrap">
+    <h2>What we found</h2>
+    <div class="takeaways">
+      <div><h3>Diets are converging</h3><p>Sugar and processed foods are rising fastest where intake started low, in South-East Asia and Africa.</p></div>
+      <div><h3>No country meets all 8 targets</h3><p>Fruit and vegetables is the hardest target in every region, met by only 8.6% of countries.</p></div>
+      <div><h3>Diet and health are linked, but not simply</h3><p>Added sugar tracks with obesity, but wealth shapes both diet and health. These are associations, not causes.</p></div>
+    </div>
+    <div class="grid3" style="margin-top:40px">
+      <div class="box"><h3>Major challenges</h3><ul class="plain"><li>FAO data measured supply, so we switched to GDD intake estimates.</li><li>GDD and WHO used different units, so we built conversions.</li><li>A few extreme countries flattened the map, so we used stepped colour bands.</li></ul></div>
+      <div class="box"><h3>Limitations</h3><ul class="plain"><li>No income control: we can't separate diet from wealth.</li><li>Averages aren't population-weighted: a small island counts as much as India.</li><li>Some WHO targets are approximated, e.g. added sugars for free sugars.</li></ul></div>
+      <div class="box"><h3>Future work</h3><ul class="plain"><li>Add GDP to separate diet from wealth.</li><li>Use population-weighted averages.</li><li>Show uncertainty ranges and add a country profile dashboard.</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<footer class="band">
+  <div class="wrap cols">
+    <div><h3>You Are What Your Country Eats</h3><p>Group 7 · Siti, Marilyn, Syakira, Riya<br>IS428 Visual Analytics, Singapore Management University</p></div>
+    <div><h3>Data sources</h3><p><a href="https://www.globaldietarydatabase.org/">Global Dietary Database</a> · <a href="https://www.who.int/data/gho">WHO Global Health Observatory</a> · <a href="https://www.who.int/news-room/fact-sheets/detail/healthy-diet">WHO Healthy diet fact sheet</a></p></div>
+    <div><h3>Dashboards</h3><p>Built in Tableau. <a href="https://public.tableau.com/app/profile/marilyn.ong/viz/InteractiveDashboardFinal/Dashboard1">Open the full workbook on Tableau Public</a></p></div>
+  </div>
+</footer>
+
+<script>
+{
+const BASE = "https://public.tableau.com/views/InteractiveDashboardFinal/";
+
+const SHEETS = {
+  a: [
+    {id:"A1Map", name:"A1 Map", sub:"Average daily intake by country",
+     what:"A world map shaded by how much of the chosen food each country eats per day. Darker means more. Grey means no data.",
+     read:"Pick a food in Diet Measure, then press play on the Year control to animate from 1990 to 2018. Colours are grouped into bands so differences stand out.",
+     find:"For added sugars, much of South and South-East Asia gets darker between 1990 and 2018."},
+    {id:"A2Trend", name:"A2 Trend", sub:"Regional averages, 1990 to 2018",
+     what:"One line per WHO region, showing the average intake of the chosen food across that region's countries.",
+     read:"Lines that rise mean a region is eating more. Each country counts equally in its region's average.",
+     find:"South-East Asia went from 5.3% to 14.2% of calories from added sugar, from second-lowest region to highest, while the Americas barely changed."},
+    {id:"A3TopBottom", name:"A3 Top–Bottom", sub:"The 10 highest and 10 lowest countries",
+     what:"Bars for the ten countries that eat the most and the ten that eat the least of the chosen food, in the chosen year.",
+     read:"The rank column jumps from 10 to 176, showing the countries in between are left out. Bars are coloured by WHO region.",
+     find:"For added sugars in 2018, Albania (32.5%), Rwanda (32.4%) and Guatemala (31.3%) top the list, while Niger and Papua New Guinea are near zero."}
+  ],
+  b: [
+    {id:"B1ShareMeeting", name:"B1 Share Meeting", sub:"Share of countries meeting each target",
+     what:"One bar per WHO target, showing the percentage of countries that meet it in the chosen year.",
+     read:"Longer bars mean more countries meet that target. Added together, the eight bars give the average number of targets met per country.",
+     find:"In 2018, carbohydrate is met by about 96% of countries but fruit and vegetables by only 8.6%. The bars add up to about 300%, so the average country meets 3 of 8."},
+    {id:"B2GuidelinesMetMap", name:"B2 Guidelines Met Map", sub:"Targets met per country, 0 to 8",
+     what:"A world map shaded by how many of the eight targets each country meets.",
+     read:"Darker countries meet more targets. Hover over a country to see its exact score.",
+     find:"No country meets all eight. Namibia meets seven, the most of any country, and France meets none."},
+    {id:"B3RegionGap", name:"B3 Region Gap", sub:"How far each region is from each target",
+     what:"A grid of WHO regions against targets, coloured by the average gap from the target as a percentage of it.",
+     read:"Orange means falling short of a minimum, blue means going over a limit, and pale means close to the target.",
+     find:"Every region is short on fruit and vegetables, fibre and potassium. South-East Asia is 62% over the free sugars limit."}
+  ],
+  c: [
+    {id:"C1Scatter", name:"C1 Scatter", sub:"One food against one outcome, with a lag",
+     what:"Each dot is a country: its intake of the chosen food in one year against its health outcome 5 or 10 years later, coloured by region.",
+     read:"An upward trend line means countries that ate more tend to have more of the outcome later.",
+     find:"Countries that ate more added sugar in 2005 had more obesity in 2015 (Spearman 0.62, 184 countries)."},
+    {id:"C2CorrelationHeatmap", name:"C2 Correlation Heatmap", sub:"14 foods against 3 outcomes",
+     what:"The Spearman correlation for every food and outcome pair, for the chosen lag and diet year.",
+     read:"Blue means both rise together, orange means one rises as the other falls. Values near 0 mean little or no link.",
+     find:"Refined grains go with higher diabetes (0.52), but sugar (−0.31), red meat (−0.32) and fruit (−0.42) go with lower premature death, most likely because richer countries eat more of them and have better healthcare."},
+    {id:"C3OutcomeTrends", name:"C3 Outcome Trends", sub:"Health outcomes by region over time",
+     what:"One line per WHO region for the chosen health outcome, from 1980 to 2024.",
+     read:"Rising lines mean the outcome is becoming more common in that region.",
+     find:"Obesity has risen in every region. Across countries, the average adult obesity rate went from 11.5% in 1990 to 22.3% in 2018."}
+  ]
+};
+
+const card = s => `
+  <article class="sheet">
+    <header><h3>${s.name}</h3><small>${s.sub}</small></header>
+    <dl>
+      <div><dt>What it shows</dt><dd>${s.what}</dd></div>
+      <div><dt>How to read it</dt><dd>${s.read}</dd></div>
+      <div><dt>What we found</dt><dd class="find">${s.find}</dd></div>
+    </dl>
+    <div class="vizframe"><div class="slot" data-viz="${s.id}" data-h="620">Loading ${s.name}…</div></div>
+  </article>`;
+
+for (const k of ["a","b","c"]) {
+  document.getElementById("sheets-" + k).innerHTML = SHEETS[k].map(card).join("");
+}
+
+function mount(slot, id) {
+  if (slot.dataset.done) return;
+  slot.dataset.done = "1";
+  const f = document.createElement("iframe");
+  f.src = BASE + id + "?:embed=y&:showVizHome=no&:toolbar=yes&:tabs=no&:display_count=no&:animate_transition=yes";
+  f.title = id + " (interactive Tableau view)";
+  f.width = "100%";
+  f.height = (slot.dataset.h || 800);
+  f.setAttribute("frameborder", "0");
+  f.setAttribute("allowfullscreen", "");
+  f.style.border = "0";
+  f.style.display = "block";
+  slot.textContent = "";
+  slot.style.display = "block";
+  slot.appendChild(f);
+}
+
+const dashObserver = new IntersectionObserver(entries => {
+  for (const e of entries) {
+    if (e.isIntersecting) { mount(e.target, e.target.dataset.viz); dashObserver.unobserve(e.target); }
+  }
+}, {rootMargin: "400px 0px"});
+document.querySelectorAll(".slot[data-viz]").forEach(s => dashObserver.observe(s));
+
+
+}
+</script>
+</body>
+</html>
